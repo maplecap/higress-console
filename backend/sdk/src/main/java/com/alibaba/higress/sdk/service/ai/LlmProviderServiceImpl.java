@@ -14,6 +14,7 @@ package com.alibaba.higress.sdk.service.ai;
 
 import static com.alibaba.higress.sdk.constant.plugin.config.AiProxyConfig.ACTIVE_PROVIDER_ID;
 import static com.alibaba.higress.sdk.constant.plugin.config.AiProxyConfig.PROVIDERS;
+import static com.alibaba.higress.sdk.constant.plugin.config.AiProxyConfig.PROVIDER_CAPABILITIES;
 import static com.alibaba.higress.sdk.constant.plugin.config.AiProxyConfig.PROVIDER_ID;
 import static com.alibaba.higress.sdk.constant.plugin.config.AiProxyConfig.PROVIDER_TYPE;
 
@@ -113,6 +114,7 @@ public class LlmProviderServiceImpl implements LlmProviderService {
         }
 
         handler.normalizeConfigs(provider.getRawConfigs());
+        syncCapabilitiesToRawConfigs(provider);
 
         fillDefaultValues(provider);
 
@@ -395,6 +397,7 @@ public class LlmProviderServiceImpl implements LlmProviderService {
             // Failed to load provider config. The provider data is incomplete.
             return null;
         }
+        provider.setCapabilities(extractCapabilities(configurations));
         return provider;
     }
 
@@ -426,5 +429,30 @@ public class LlmProviderServiceImpl implements LlmProviderService {
         if (StringUtils.isEmpty(provider.getProtocol())) {
             provider.setProtocol(LlmProviderProtocol.OPENAI_V1.getValue());
         }
+    }
+
+    private static void syncCapabilitiesToRawConfigs(LlmProvider provider) {
+        if (provider.getRawConfigs() == null) {
+            provider.setRawConfigs(new HashMap<>());
+        }
+        if (MapUtils.isEmpty(provider.getCapabilities())) {
+            provider.getRawConfigs().remove(PROVIDER_CAPABILITIES);
+            return;
+        }
+        provider.getRawConfigs().put(PROVIDER_CAPABILITIES, new HashMap<>(provider.getCapabilities()));
+    }
+
+    private static Map<String, String> extractCapabilities(Map<String, Object> configurations) {
+        Object capabilitiesObj = configurations.get(PROVIDER_CAPABILITIES);
+        if (!(capabilitiesObj instanceof Map<?, ?>)) {
+            return null;
+        }
+        Map<String, String> capabilities = new HashMap<>();
+        ((Map<?, ?>)capabilitiesObj).forEach((k, v) -> {
+            if (k instanceof String && v instanceof String) {
+                capabilities.put((String)k, (String)v);
+            }
+        });
+        return capabilities.isEmpty() ? null : capabilities;
     }
 }

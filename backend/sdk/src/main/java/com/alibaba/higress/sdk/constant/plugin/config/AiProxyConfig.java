@@ -20,6 +20,7 @@ public class AiProxyConfig {
     public static final String PROVIDER_ID = "id";
     public static final String PROVIDER_TYPE = "type";
     public static final String PROVIDER_API_TOKENS = "apiTokens";
+    public static final String PROVIDER_CAPABILITIES = "capabilities";
 
     public static final String PROTOCOL = "protocol";
 

@@ -17,7 +17,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 public class HigressConstants {
-    public static final String NS_DEFAULT = "higress-system";
+    public static final String NS_DEFAULT = "default";
     public static final String CONTROLLER_SERVICE_NAME_DEFAULT = "higress-controller";
     public static final String CONTROLLER_INGRESS_CLASS_NAME_DEFAULT = "higress";
     public static final String NGINX_INGRESS_CLASS_NAME = "nginx";

@@ -1,10 +1,13 @@
 export interface LlmProvider {
   key?: string;
+  version?: number;
   name: string;
   type: string;
   protocol?: string;
   proxyName?: string;
   tokens: string[];
+  capabilities?: Record<string, string>;
+  rawConfigs?: Record<string, any>;
   tokenFailoverConfig?: TokeFailoverConfig;
 }
 

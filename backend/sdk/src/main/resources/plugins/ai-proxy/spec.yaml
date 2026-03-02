@@ -105,6 +105,16 @@ spec:
                 zh-CN: 用于将请求中的模型名称映射为目标AI服务商支持的模型名称。支持通过“*”来配置全局映射
               additionalProperties:
                 type: string
+            capabilities:
+              type: object
+              title: 额外支持的AI能力
+              x-title-i18n:
+                zh-CN: 额外支持的AI能力
+              description: '开放的AI能力和URL Path映射，例如 {"openai/v1/chatcompletions": "/v1/chat/completions"}'
+              x-description-i18n:
+                zh-CN: '开放的AI能力和URL Path映射，例如 {"openai/v1/chatcompletions": "/v1/chat/completions"}'
+              additionalProperties:
+                type: string
             moonshotFileId:
               type: string
               title: Moonshot File ID
@@ -227,6 +237,16 @@ spec:
               description: 用于将请求中的模型名称映射为目标AI服务商支持的模型名称。支持通过“*”来配置全局映射
               x-description-i18n:
                 zh-CN: 用于将请求中的模型名称映射为目标AI服务商支持的模型名称。支持通过“*”来配置全局映射
+              additionalProperties:
+                type: string
+            capabilities:
+              type: object
+              title: 额外支持的AI能力
+              x-title-i18n:
+                zh-CN: 额外支持的AI能力
+              description: '开放的AI能力和URL Path映射，例如 {"openai/v1/chatcompletions": "/v1/chat/completions"}'
+              x-description-i18n:
+                zh-CN: '开放的AI能力和URL Path映射，例如 {"openai/v1/chatcompletions": "/v1/chat/completions"}'
               additionalProperties:
                 type: string
             moonshotFileId:

@@ -42,6 +42,8 @@ public class LlmProvider {
     private List<String> tokens;
     @Schema(description = "Token fail-over configuration")
     private TokenFailoverConfig tokenFailoverConfig;
+    @Schema(description = "Extra supported AI capabilities and URL path mapping")
+    private Map<String, String> capabilities;
     @Schema(description = "Raw configuration key-value pairs used by ai-proxy plugin")
     private Map<String, Object> rawConfigs;
 

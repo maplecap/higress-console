@@ -17,6 +17,34 @@ const protocolList = [
   { label: "openai/v1", value: "openai/v1" },
 ];
 
+interface CapabilityEntry {
+  key?: string;
+  value?: string;
+}
+
+function mapToCapabilityEntries(capabilities?: Record<string, string> | null): CapabilityEntry[] {
+  if (!capabilities || typeof capabilities !== 'object') {
+    return [];
+  }
+  return Object.entries(capabilities).map(([key, value]) => ({ key, value }));
+}
+
+function capabilityEntriesToMap(entries?: CapabilityEntry[] | null): Record<string, string> | null {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return null;
+  }
+  const capabilities: Record<string, string> = {};
+  entries.forEach((entry) => {
+    const key = entry?.key?.trim();
+    const value = entry?.value?.trim();
+    if (!key || !value) {
+      return;
+    }
+    capabilities[key] = value;
+  });
+  return Object.keys(capabilities).length > 0 ? capabilities : null;
+}
+
 const ProviderForm: React.FC = forwardRef((props: { value: any }, ref) => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
@@ -93,6 +121,7 @@ const ProviderForm: React.FC = forwardRef((props: { value: any }, ref) => {
         tokens,
         tokenFailoverConfig = {},
         proxyName = '',
+        capabilities,
         rawConfigs = {},
       } = props.value;
       const {
@@ -167,6 +196,7 @@ const ProviderForm: React.FC = forwardRef((props: { value: any }, ref) => {
         type,
         protocol,
         tokens: tokens && tokens.length && tokens || [""],
+        capabilitiesEntries: mapToCapabilityEntries(capabilities || rawConfigs?.capabilities),
         failoverEnabled: localFailoverEnabled,
         failureThreshold: failureThreshold || 1,
         successThreshold: successThreshold || 1,
@@ -205,6 +235,7 @@ const ProviderForm: React.FC = forwardRef((props: { value: any }, ref) => {
         tokens: values.tokens ? values.tokens.filter(v => v) : null,
         version: 0,
         protocol: values.protocol,
+        capabilities: capabilityEntriesToMap(values.capabilitiesEntries),
         tokenFailoverConfig: {
           enabled: values.failoverEnabled,
           failureThreshold: values.failureThreshold,
@@ -1098,6 +1129,95 @@ const ProviderForm: React.FC = forwardRef((props: { value: any }, ref) => {
           </>
         )
       }
+
+      <Form.List
+        name="capabilitiesEntries"
+        initialValue={[]}
+        rules={[
+          {
+            validator: async (_, value: CapabilityEntry[]) => {
+              if (!Array.isArray(value)) {
+                return;
+              }
+              const seen = new Set<string>();
+              for (const item of value) {
+                const key = item?.key?.trim();
+                if (!key) {
+                  continue;
+                }
+                if (seen.has(key)) {
+                  throw new Error(t('llmProvider.providerForm.rules.capabilityKeyDuplicated'));
+                }
+                seen.add(key);
+              }
+            },
+          },
+        ]}
+      >
+        {(fields, { add, remove }, { errors }) => (
+          <>
+            <Form.Item
+              label={t('llmProvider.providerForm.label.capabilities')}
+              style={{ marginBottom: '8px' }}
+            >
+              <Text type="secondary">{t('llmProvider.providerForm.label.capabilitiesExtra')}</Text>
+              <br />
+              <Text type="secondary">{t('llmProvider.providerForm.label.capabilitiesExample')}</Text>
+            </Form.Item>
+            {fields.map((field, index) => (
+              <Form.Item
+                required={false}
+                key={field.key}
+                style={{ marginBottom: '0.5rem' }}
+              >
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <Form.Item
+                    {...field}
+                    name={[field.name, 'key']}
+                    noStyle
+                    rules={[
+                      { required: true, message: t('llmProvider.providerForm.rules.capabilityKeyRequired') },
+                    ]}
+                  >
+                    <Input
+                      allowClear
+                      style={{ width: '48%' }}
+                      placeholder={t('llmProvider.providerForm.placeholder.capabilityKeyPlaceholder')}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    {...field}
+                    name={[field.name, 'value']}
+                    noStyle
+                    rules={[
+                      { required: true, message: t('llmProvider.providerForm.rules.capabilityValueRequired') },
+                    ]}
+                  >
+                    <Input
+                      allowClear
+                      style={{ width: '48%' }}
+                      placeholder={t('llmProvider.providerForm.placeholder.capabilityValuePlaceholder')}
+                    />
+                  </Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => remove(field.name)}
+                    icon={<MinusCircleOutlined />}
+                  />
+                </div>
+              </Form.Item>
+            ))}
+            <Form.Item>
+              <Button
+                type="dashed"
+                onClick={() => add({ key: '', value: '' })}
+                icon={<PlusOutlined />}
+              />
+              <Form.ErrorList errors={errors} />
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
 
       {/* 令牌降级 */}
       <Form.Item
